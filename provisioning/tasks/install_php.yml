@@ -1,0 +1,46 @@
+- name: PHP | Installing PHP
+  apt: name=php5-fpm state=present update_cache=yes
+
+- name: PHP | Pool Configuration
+  copy: src=files/www.conf dest=/etc/php5/fpm/pool.d/www.conf owner=root group=root mode=0644
+ 
+- name: GIT | Client
+  apt: name=git state=present
+
+- name: PHP | Clone phpredis
+  git: repo=git://github.com/nicolasff/phpredis.git
+       dest=/opt/phpredis
+       accept_hostkey=yes
+
+- name: PHP | phpredis Build Dependencies
+  apt: name="{{ item }}" state=present
+  with_items:
+       - dh-make-php 
+       - php5-dev 
+       - build-essential
+
+- name: PHP | Compile phpredis
+  shell: "{{ item }}" 
+  args:
+       chdir: /opt/phpredis
+  with_items:
+       - /usr/bin/phpize
+       - ./configure
+       - /usr/bin/make
+       - /usr/bin/make install
+
+- name: PHP | Activate phpredis
+  shell: /bin/echo "extension=redis.so" >> /etc/php5/conf.d/phpredis.ini
+
+- name: GIT | Clone App
+  git: repo=git://github.com/Tombar/sample-app
+       dest=/srv/www/sample-app
+       accept_hostkey=yes
+
+- name: APP | Configure
+  copy: src=files/settings.php dest=/srv/www/sample-app/settings.php owner=root group=root mode=0644
+
+- name: PHP | Starting PHP
+  service:
+    name: php5-fpm
+    state: restarted

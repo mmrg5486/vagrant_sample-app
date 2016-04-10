@@ -1,0 +1,11 @@
+- hosts: redis
+  tasks:
+    - include: 'tasks/install_redis.yml'
+
+- hosts: php
+  tasks:
+    - include: 'tasks/install_php.yml'
+
+- hosts: nginx
+  tasks:
+    - include: 'tasks/install_nginx.yml'

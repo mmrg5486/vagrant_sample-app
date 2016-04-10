@@ -1,0 +1,10 @@
+- name: REDIS | Installing REDIS
+  apt: name=redis-server state=present update_cache=yes
+
+- name: REDIS | Configuration
+  copy: src=files/redis.conf dest=/etc/redis/redis.conf owner=root group=root mode=0644
+
+- name: REDIS | Starting REDIS
+  service:
+    name: redis-server
+    state: restarted

@@ -1,0 +1,22 @@
+- name: NGINX | Installing NGINX
+  apt: name=nginx state=present update_cache=yes
+
+- name: NGINX | Configuration
+  copy: src=files/default dest=/etc/nginx/sites-available/default owner=root group=root mode=0644
+
+- name: NGINX | Create Root Directory
+  file: path=/srv/www state=directory mode=0755
+ 
+- name: NGINX | Starting NGINX
+  service:
+    name: nginx
+    state: restarted
+
+- name: Monitor | Installing mailutils
+  apt: name=mailutils state=present
+
+- name: Monitor | Configuration
+  copy: src=files/monitor.sh dest=/opt/monitor.sh owner=root group=root mode=0750
+
+- name: Monitor | Crontab
+  cron: name="monitor" user="root" minute="*/5" hour="*" day="*" month="*" weekday="*" job="/opt/monitor.sh"
